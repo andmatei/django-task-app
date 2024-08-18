@@ -1,4 +1,6 @@
-<form action="{% url 'tasks:edit' task.id %}" method="put">
+{{ form.errors }}
+
+<form action="{% url 'edit_task' %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Save</button>

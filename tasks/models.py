@@ -16,7 +16,7 @@ class Task(models.Model):
         choices=PRIORITY,
         default=2,
     )
-    is_urgent = models.BooleanField(default=False, blank=True, null=True)
+    is_urgent = models.BooleanField(default=False)
 
     def __str__(self):
         return self.task
