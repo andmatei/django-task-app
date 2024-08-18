@@ -1,0 +1,5 @@
+<form action="{% url 'tasks:edit' task.id %}" method="put">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>

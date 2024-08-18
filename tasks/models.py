@@ -8,6 +8,7 @@ class Task(models.Model):
         (3, 'High'),
     ]
     
+    id = models.AutoField(primary_key=True)
     user_email = models.EmailField()
     task = models.CharField(max_length=200)
     due_by = models.DateTimeField()
