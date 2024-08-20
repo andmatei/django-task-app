@@ -1,0 +1,196 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page-title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-cols-3 gap-4 mb-4">
+    <div class="flex flex-col justify-between col-span-1 row-span-1 bg-white rounded-lg shadow-sm p-4">
+        <div class="mb-8">
+            <p class="text-gray-800 font-bold text-lg">Task summary</p>
+            <p class="text-gray-600 font-thin text-sm">Overview of tasks in the next 30 days</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col justify-between h-40 w-40 bg-rose-200 rounded-xl p-4 md:p-6">
+                <span
+                    class="inline-flex items-center justify-center w-5 h-5 p-3 text-sm font-medium bg-rose-400 rounded-full">
+                    <svg class="flex-shrink-0 w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+                            clip-rule="evenodd" />
+                    </svg>
+                </span>
+
+                <div class="align-bottom mb-2">
+                    <p class="text-gray-800 font-bold text-xl">
+                        {% if stats.counts.urgent %}
+                        {{stats.counts.urgent}}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-800 text-base">Urgent tasks</p>
+                </div>
+            </div>
+            <div class="flex flex-col justify-between h-40 w-40 bg-blue-200 rounded-xl p-4 md:p-6">
+                <span
+                    class="inline-flex items-center justify-center w-5 h-5 p-3 text-sm font-medium bg-blue-400 rounded-full">
+                    <svg class="flex-shrink-0 w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+                        <path
+                            d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                    </svg>
+                </span>
+
+                <div class="align-bottom mb-2">
+                    <p class="text-gray-800 font-bold text-xl">
+                        {% if stats.counts.total %}
+                        {{stats.counts.total}}
+                        {% else %}
+                        0
+                        {% endif %}
+                    </p>
+                    <p class="text-gray-800 text-base">Total tasks</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col justify-between col-span-2 row-span-1 bg-white round-lg shadow-sm p-4">
+        <div class="flex justify-between mb-1 align-top">
+            <h5 class="leading-none text-lg font-bold text-gray-800 me-1">Total tasks</h5>
+        </div>
+        <div class="align-bottom" id="line-chart"></div>
+    </div>
+
+    <div class="col-span-1 row-span-1 bg-white rounded-lg shadow-sm p-4">
+        <div class="flex-col items-center">
+            <div class="flex items-center mb-1">
+                <h5 class="text-lg font-bold leading-none text-gray-800 me-1">Task priority</h5>
+            </div>
+        </div>
+        <div class="py-6" id="pie-chart"></div>
+
+
+    </div>
+    <div class="flex flex-col justify-between col-span-2 row-span-1 bg-white round-lg shadow-sm p-4">
+        <div class="align-top flex justify-between mb-1">
+            <h5 class="leading-none text-lg font-bold text-gray-800 me-1">Upcoming tasks</h5>
+        </div>
+
+        <div class="align-bottom" id="column-chart"></div>
+    </div>
+</div>
+<div class="relative overflow-x-auto shadow-sm rounded-lg p-4">
+    <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-white">
+            <tr>
+                <th scope="col" class="px-6 py-3">Task</th>
+                <th scope="col" class="px-6 py-3">Email</th>
+                <th scope="col" class="px-6 py-3">Due by</th>
+                <th scope="col" class="px-6 py-3">Priority</th>
+                <th scope="col" class="px-6 py-3">Urgent</th>
+                <th scope="col" class="px-6 py-3">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr class="bg-white border-b">
+                <th scope="row" class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap">
+                    {{ task.task }}
+                </th>
+                <td class="px-6 py-3">
+                    {{ task.user_email }}
+                </td>
+                <td class="px-6 py-3">
+                    {{ task.due_by }}
+                </td>
+                <td class="px-6 py-3">
+                    {% if task.priority == 1 %}
+                    <span
+                        class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+                        Low
+                    </span>
+                    {% elif task.priority == 2 %}
+                    <span
+                        class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
+                        Medium
+                    </span>
+                    {% else %}
+                    <span
+                        class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
+                        High
+                    </span>
+                    {% endif %}
+                <td class="px-6 py-3">
+                    <input type="checkbox" {% if task.is_urgent %} checked {% endif %} disabled class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                </td>
+                <td class="px-6 py-3">
+                    <div class="flex items-center">
+                        <button id="widgetDropdownButton-{{forloop.counter}}"
+                            data-dropdown-toggle="widgetDropdown-{{forloop.counter}}" data-dropdown-placement="bottom"
+                            type="button"
+                            class="inline-flex items-center justify-center text-gray-500 w-8 h-8 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm"><svg
+                                class="w-3.5 h-3.5 text-gray-800 dark:text-white" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
+                                <path
+                                    d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+                            </svg><span class="sr-only">Open dropdown</span>
+                        </button>
+                        <div id="widgetDropdown-{{forloop.counter}}"
+                            class="z-20 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                                aria-labelledby="widgetDropdownButton-{{forloop.counter}}">
+                                <li>
+                                    <form action="{% url 'task-update' task.id %}" method="get">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                            class="flex w-full items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"><svg
+                                                class="w-3 h-3 me-2" aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2"
+                                                    d="M7.418 17.861 1 20l2.139-6.418m4.279 4.279 10.7-10.7a3.027 3.027 0 0 0-2.14-5.165c-.802 0-1.571.319-2.139.886l-10.7 10.7m4.279 4.279-4.279-4.279m2.139 2.14 7.844-7.844m-1.426-2.853 4.279 4.279" />
+                                            </svg>Edit
+                                        </button>
+                                    </form>
+                                </li>
+                                <li>
+                                    <form action="{% url 'task-delete' task.id%}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                            class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"><svg
+                                                class="w-3 h-3 me-2" aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                viewBox="0 0 20 20">
+                                                <path
+                                                    d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z" />
+                                                <path
+                                                    d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" />
+                                            </svg>Detele
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/dashboard.js' %}" defer></script>
+{{ stats|json_script:"stats" }}
+{{ start_date|json_script:"start_date" }}
+{{ end_date|json_script:"end_date" }}
+{% endblock %}
