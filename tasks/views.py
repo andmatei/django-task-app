@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 
 from tasks.forms import EditTaskForm
 from tasks.models import Task
@@ -55,6 +56,8 @@ class EditTaskView(LoginRequiredMixin, View):
 class Dashboard(LoginRequiredMixin, View):
     def get(self, request):
         days = request.GET.get('days', 30)
+        tasks_per_page = request.GET.get('tasks_per_page', 10)
+        page_number = request.GET.get('page', 1)
 
         now = datetime.datetime.now()
         delta = datetime.timedelta(days=days)
@@ -63,7 +66,10 @@ class Dashboard(LoginRequiredMixin, View):
         end_time = now + delta
 
         all_tasks = Task.objects.all()
-        
+
+        paginator = Paginator(all_tasks, tasks_per_page)
+        page_obj = paginator.get_page(page_number)
+
         # Filter tasks by due date
         upcoming_tasks = Task.objects.filter(due_by__range=[start_time, end_time])
         
@@ -94,7 +100,7 @@ class Dashboard(LoginRequiredMixin, View):
                 dates['high_priority'][index] += 1
 
         context = {
-            'tasks': all_tasks,
+            'page': page_obj,
             'start_date': start_time.date(),
             'end_date': end_time.date(),
             'stats': {
@@ -110,8 +116,3 @@ class Dashboard(LoginRequiredMixin, View):
         }
 
         return render(request, 'tasks/dashboard.html', context)
-    
-
-class IndexView(View):
-    def get(self, request):
-        return render(request, 'tasks/index.html')

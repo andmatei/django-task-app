@@ -99,7 +99,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for task in tasks %}
+            {% for task in page %}
             <tr class="bg-white border-b">
                 <th scope="row" class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap">
                     {{ task.task }}
@@ -128,7 +128,8 @@
                     </span>
                     {% endif %}
                 <td class="px-6 py-3">
-                    <input type="checkbox" {% if task.is_urgent %} checked {% endif %} disabled class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                    <input type="checkbox" {% if task.is_urgent %} checked {% endif %} disabled
+                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                 </td>
                 <td class="px-6 py-3">
                     <div class="flex items-center">
@@ -184,6 +185,28 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="flex flex-col items-center mt-4">
+        <!-- Help text -->
+        <span class="text-sm text-gray-700 dark:text-gray-400">
+            Page <span class="font-semibold text-gray-900 dark:text-white">{{ page.number }}</span> of <span
+                class="font-semibold text-gray-900 dark:text-white">{{ page.paginator.num_pages }} </span>.
+        <!-- Buttons -->
+        <div class="inline-flex mt-2 xs:mt-0">
+            {% if page.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}"
+                class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white bg-gray-800 rounded hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                Prev
+            </a>
+            {% endif %}
+            <span class="w-1>"></span>
+            {% if page.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"
+                class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white bg-gray-800 border-0 border-s border-gray-700 rounded hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                Next
+            </a>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 {% endblock %}
