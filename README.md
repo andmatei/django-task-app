@@ -1,7 +1,7 @@
-task-app
+django-task-app
 ============
 
-task-app is a Django app to conduct provides statistics for tasks.
+django-task-app is a Django app to conduct provides statistics for tasks.
 
 Quick start
 -----------
