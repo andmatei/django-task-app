@@ -10,7 +10,7 @@ Quick start
 
 2. Start the development server with ``python manage.py runserver``.
 
-3. Visit the admin page to configure a password for accessing all the functionalities of the website. Create a user with the username ``user`` and the chosen password.
+3. Some functionalities of the website (such as the dashboard and all CRUD operations for tasks) are protected by a password (without the need for a username). To set this up, visit the admin page to configure a password. Create a user with the username ``user`` and the chosen password.
 
 3. Visit ``/`` for the landing page. The other pages are protected by the chosen password.
 
