@@ -7,6 +7,7 @@
 {% block page-title %}Dashboard{% endblock %}
 
 {% block content %}
+<meta name="csrf-token" content="{{ csrf_token }}">
 
 <div class="grid grid-cols-3 gap-4 mb-4">
     <div class="flex flex-col justify-between col-span-1 row-span-1 bg-white rounded-lg shadow-sm p-4">
@@ -26,12 +27,8 @@
                 </span>
 
                 <div class="align-bottom mb-2">
-                    <p class="text-gray-800 font-bold text-xl">
-                        {% if stats.counts.urgent %}
-                        {{stats.counts.urgent}}
-                        {% else %}
-                        0
-                        {% endif %}
+                    <p id="total-tasks-urgent" class="text-gray-800 font-bold text-xl">
+                        <!-- shows urgent over all tasks -->
                     </p>
                     <p class="text-gray-800 text-base">Urgent tasks</p>
                 </div>
@@ -48,12 +45,8 @@
                 </span>
 
                 <div class="align-bottom mb-2">
-                    <p class="text-gray-800 font-bold text-xl">
-                        {% if stats.counts.total %}
-                        {{stats.counts.total}}
-                        {% else %}
-                        0
-                        {% endif %}
+                    <p id="total-tasks" class="text-gray-800 font-bold text-xl">
+                        <!-- shows all total tasks -->
                     </p>
                     <p class="text-gray-800 text-base">Total tasks</span></p>
                 </div>
@@ -98,8 +91,8 @@
                 <th scope="col" class="px-6 py-3">Actions</th>
             </tr>
         </thead>
-        <tbody>
-            {% for task in page %}
+        <tbody id="task-table-body">
+            <!-- {% for task in page %}
             <tr class="bg-white border-b">
                 <th scope="row" class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap">
                     {{ task.task }}
@@ -182,7 +175,8 @@
                     </div>
                 </td>
             </tr>
-            {% endfor %}
+            {% endfor %} -->
+            <!-- Rows will be inserted here by JQuery -->
         </tbody>
     </table>
     <div class="flex flex-col items-center mt-4">
@@ -208,14 +202,14 @@
         </div>
     </div>
 </div>
+<script src="{% static 'js/dashboard.js' %}" ></script>
 
 {% endblock %}
 
 {% block scripts %}
 
-<script src="{% static 'js/dashboard.js' %}" defer></script>
-
+<!-- 
 {{ stats|json_script:"stats" }}
 {{ start_date|json_script:"start_date" }}
-{{ end_date|json_script:"end_date" }}
+{{ end_date|json_script:"end_date" }} -->
 {% endblock %}

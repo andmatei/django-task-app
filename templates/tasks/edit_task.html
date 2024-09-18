@@ -10,9 +10,12 @@
 
 {% block content %}
 
-<form action="" method="post">
+<form action="{% if form.instance.id %}/api/tasks/{{ form.instance.id }}{% else %}/api/tasks{% endif %}" method="{% if form.instance.id %}PUT{{ form.instance.id }}{% else %}POST{% endif %}">
+    {% csrf_token %}
+    {% if form.instance.id %}
+    <input type="hidden" name="_method" value="PUT">
+    {% endif %}
     <div class="grid gap-6 mb-6">
-        {% csrf_token %}
         {% for field in form %}
         <div class="mb-4 text-sm font-medium text-gray-900">
             {{ field.label_tag }}

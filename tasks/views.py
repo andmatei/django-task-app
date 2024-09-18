@@ -14,27 +14,20 @@ class CreateTaskView(LoginRequiredMixin, View):
         form = EditTaskForm()
         return render(request, 'tasks/edit_task.html', {'form': form})
     
-    def post(self, request):
-        form = EditTaskForm(request.POST)
-        if form.is_valid():
-            form.save(commit=True)
-            return HttpResponseRedirect(reverse('dashboard'))
-        else:
-            return render(request, 'tasks/edit_task.html', {'form': form, 'errors': form.errors})
+    # def post(self, request):
+    #     form = EditTaskForm(request.POST)
+    #     if form.is_valid():
+    #         form.save(commit=True)
+    #         return HttpResponseRedirect(reverse('dashboard'))
+    #     else:
+    #         return render(request, 'tasks/edit_task.html', {'form': form, 'errors': form.errors})
         
 
-class EditTaskView(LoginRequiredMixin, View):
-    def get(self, request, task_id):
-        task = get_object_or_404(Task, id=task_id)
-        form = EditTaskForm(instance=task)
-        return render(request, 'tasks/edit_task.html', {'form': form})
-
-
-class DeleteTaskView(LoginRequiredMixin, View):
-    def post(self, request, task_id):
-        task = get_object_or_404(Task, id=task_id)
-        task.delete()
-        return HttpResponseRedirect(reverse('dashboard'))
+# class DeleteTaskView(LoginRequiredMixin, View):
+#     def post(self, request, task_id):
+#         task = get_object_or_404(Task, id=task_id)
+#         task.delete()
+#         return HttpResponseRedirect(reverse('dashboard'))
     
 
 class EditTaskView(LoginRequiredMixin, View):
@@ -43,14 +36,14 @@ class EditTaskView(LoginRequiredMixin, View):
         form = EditTaskForm(instance=task)
         return render(request, 'tasks/edit_task.html', {'form': form})
     
-    def post(self, request, task_id):
-        task = get_object_or_404(Task, id=task_id)
-        form = EditTaskForm(request.POST, instance=task)
-        if form.is_valid():
-            form.save()
-            return HttpResponseRedirect(reverse('dashboard'))
-        else:
-            return render(request, 'tasks/edit_task.html', {'form': form, 'errors': form.errors})
+    # def post(self, request, task_id):
+    #     task = get_object_or_404(Task, id=task_id)
+    #     form = EditTaskForm(request.POST, instance=task)
+    #     if form.is_valid():
+    #         form.save()
+    #         return HttpResponseRedirect(reverse('dashboard'))
+    #     else:
+    #         return render(request, 'tasks/edit_task.html', {'form': form, 'errors': form.errors})
 
     
 class Dashboard(LoginRequiredMixin, View):

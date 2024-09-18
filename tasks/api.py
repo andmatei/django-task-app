@@ -3,9 +3,13 @@ import datetime
 from tasks.models import Task
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from tasks.forms import EditTaskForm
+
+from ninja.security import django_auth
 
 api = NinjaAPI()
-@api.get("/tasks")
+
+@api.get("/tasks", auth=django_auth)
 def get_tasks(request):
     days = request.GET.get('days', 30)
     tasks_per_page = request.GET.get('tasks_per_page', 10)
@@ -51,8 +55,16 @@ def get_tasks(request):
         elif task.priority == 3:
             dates['high_priority'][index] += 1
 
+    page_data = {
+        'number': page_obj.number,
+        'num_pages': page_obj.paginator.num_pages,
+        'has_next': page_obj.has_next(),
+        'has_previous': page_obj.has_previous(),
+        'tasks': list(page_obj.object_list.values())
+    }
+
     context = {
-        # 'page': page_obj,
+        'page': page_data,
         'start_date': start_time.date(),
         'end_date': end_time.date(),
         'stats': {
@@ -68,3 +80,30 @@ def get_tasks(request):
     }
     return JsonResponse(context)
 
+
+@api.put("/tasks/{task_id}", auth=django_auth) # TO UPDATE
+def update_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    form = EditTaskForm(request.POST, instance=task)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({'message': 'Task updated successfully'})
+    else:
+        return JsonResponse({'errors': form.errors})
+    
+
+
+@api.delete("/tasks/{task_id}", auth=django_auth)
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    task.delete()
+    return JsonResponse({'message': 'Task deleted successfully'})
+
+@api.post("/tasks", auth=django_auth) # TO ADD
+def create_task(request):
+    form = EditTaskForm(request.POST)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({'message': 'Task created successfully'})
+    else:
+        return JsonResponse({'errors': form.errors})
