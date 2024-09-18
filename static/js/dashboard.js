@@ -1,4 +1,14 @@
 
+
+
+// $.getJSON("/api/stats", function(data) {
+//     stats = data.stats;
+//     startDate = data.start_date;
+//     endDate = data.end_date;    
+// })
+
+
+
 const dateRange = (startDate, endDate) => {
     const dates = [];
     let currentDate = new Date(startDate);
@@ -11,10 +21,29 @@ const dateRange = (startDate, endDate) => {
 
     return dates;
 }
+let stats, startDate, endDate;
 
-const stats = JSON.parse(document.getElementById("stats").textContent);
-const startDate = JSON.parse(document.getElementById("start_date").textContent);
-const endDate = JSON.parse(document.getElementById("end_date").textContent);
+async function getData(){
+    try {
+      const response = await $.getJSON("/api/tasks");
+      stats = response.stats;
+      startDate = response.start_date;
+      endDate = response.end_date;
+      console.log(response);
+
+    } catch (error) {
+      console.error(error);
+    }
+    console.log("MAAA PWEASEE :C")
+}
+
+getData()
+
+console.log(stats)
+console.log("hallo :3")
+// const stats = JSON.parse(document.getElementById("stats").textContent);
+// const startDate = JSON.parse(document.getElementById("start_date").textContent);
+// const endDate = JSON.parse(document.getElementById("end_date").textContent);
 
 const dateStats = stats.dates;
 const countStats = stats.counts;

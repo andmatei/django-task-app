@@ -212,7 +212,9 @@
 {% endblock %}
 
 {% block scripts %}
+
 <script src="{% static 'js/dashboard.js' %}" defer></script>
+
 {{ stats|json_script:"stats" }}
 {{ start_date|json_script:"start_date" }}
 {{ end_date|json_script:"end_date" }}
