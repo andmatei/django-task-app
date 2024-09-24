@@ -10,11 +10,8 @@
 
 {% block content %}
 
-<form action="{% if form.instance.id %}/api/tasks/{{ form.instance.id }}{% else %}/api/tasks{% endif %}" method="{% if form.instance.id %}PUT{{ form.instance.id }}{% else %}POST{% endif %}">
-    {% csrf_token %}
-    {% if form.instance.id %}
-    <input type="hidden" name="_method" value="PUT">
-    {% endif %}
+
+<form id="taskForm">
     <div class="grid gap-6 mb-6">
         {% for field in form %}
         <div class="mb-4 text-sm font-medium text-gray-900">
@@ -30,4 +27,45 @@
     </div>
     <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Submit</button>
 </form>
+
+<script>
+    $(document).ready(function() {
+        $('#taskForm').on('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+    
+            var formData = $(this).serialize(); // Serialize the form data
+    
+            var url = '/api/tasks';
+            var method = 'POST';
+    
+            // Check if the form has an instance ID
+            {% if form.instance.id %}
+            console.debug('Task instance ID found, updating existing task');
+            url = '/api/tasks/{{ form.instance.id }}';
+            method = 'PUT';
+            {% endif %}    
+            $.ajax({
+                url: url,
+                type: method,
+                data: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}' // Include the CSRF token in the headers
+                },
+                success: function(response) {
+                    // Handle the successful response here
+                    console.log('Form submitted successfully:', response);
+                    window.location.href = '/';
+                    
+                },
+                error: function(xhr, status, error) {
+                    // Handle the error response here
+                    console.error('Form submission failed:', error);
+                    alert('Error submitting form: ' + error);
+                    
+                }
+            });
+        });
+    });
+    </script>
+
 {% endblock %}

@@ -2,10 +2,13 @@ from ninja import NinjaAPI
 import datetime
 from tasks.models import Task
 from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from tasks.forms import EditTaskForm
-
+from django.http import QueryDict
 from ninja.security import django_auth
+import json
+
 
 api = NinjaAPI()
 
@@ -80,16 +83,22 @@ def get_tasks(request):
     }
     return JsonResponse(context)
 
-
-@api.put("/tasks/{task_id}", auth=django_auth) # TO UPDATE
-def update_task(request, task_id):
+@api.put("/tasks/{task_id}", auth=django_auth)
+def update_task(request, task_id: int):
     task = get_object_or_404(Task, id=task_id)
-    form = EditTaskForm(request.POST, instance=task)
+    task_data = QueryDict(request.body.decode("utf-8"))
+    
+    form = EditTaskForm(task_data, instance=task)
+    # Check if the form is valid
     if form.is_valid():
+        # Save the updated task
         form.save()
-        return JsonResponse({'message': 'Task updated successfully'})
+        # Return a success message
+        return JsonResponse({"message": "Task updated successfully"})
     else:
-        return JsonResponse({'errors': form.errors})
+        # Return the form errors if the form is not valid
+        return JsonResponse({"errors": form.errors}, status=400)
+
     
 
 

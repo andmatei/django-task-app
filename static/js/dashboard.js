@@ -1,3 +1,5 @@
+const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
 const dateRange = (startDate, endDate) => {
     const dates = [];
     let currentDate = new Date(startDate);
@@ -317,6 +319,7 @@ getData().then(response => {
         tableBody.append(createTaskRow(task, index));
     });
 
+
 })
 
 
@@ -351,7 +354,6 @@ function createPriorityBadge(priority) {
 }
 
 function createTaskRow(task, index) {
-    const csrfToken = $('meta[name="csrf-token"]').attr('content');
     return `
         <tr class="bg-white border-b">
             <th scope="row" class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap">
@@ -386,24 +388,18 @@ function createTaskRow(task, index) {
                         <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
                             aria-labelledby="widgetDropdownButton-${index}">
                             <li>
-                                <form action="/api/tasks/${task.id}" method="post" >
-                                    <input type="hidden" name="_method" value="put">
-                                    <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
-                                    <button type="submit"
-                                        class="flex w-full items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                        <svg class="w-3 h-3 me-2" aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21">
-                                            <path stroke="currentColor" stroke-linecap="round"
-                                                stroke-linejoin="round" stroke-width="2"
-                                                d="M7.418 17.861 1 20l2.139-6.418m4.279 4.279 10.7-10.7a3.027 3.027 0 0 0-2.14-5.165c-.802 0-1.571.319-2.139.886l-10.7 10.7m4.279 4.279-4.279-4.279m2.139 2.14 7.844-7.844m-1.426-2.853 4.279 4.279" />
-                                        </svg>Edit
-                                    </button>
-                                </form>
+                                <a href="/tasks/${task.id}/edit/"
+                                    class="flex w-full items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    <svg class="w-3 h-3 me-2" aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21">
+                                        <path stroke="currentColor" stroke-linecap="round"
+                                            stroke-linejoin="round" stroke-width="2"
+                                            d="M7.418 17.861 1 20l2.139-6.418m4.279 4.279 10.7-10.7a3.027 3.027 0 0 0-2.14-5.165c-.802 0-1.571.319-2.139.886l-10.7 10.7m4.279 4.279-4.279-4.279m2.139 2.14 7.844-7.844m-1.426-2.853 4.279 4.279" />
+                                    </svg>Edit
+                                </a>
                             </li>
                             <li>
-                                <form action="/api/tasks/${task.id}" method="post">
-                                    <input type="hidden" name="_method" value="delete">
-                                    <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                                <form action="/api/tasks/${task.id}" onsubmit="deleteTask(event)">
                                     <button type="submit"
                                         class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                         <svg class="w-3 h-3 me-2" aria-hidden="true"
@@ -421,4 +417,23 @@ function createTaskRow(task, index) {
             </td>
         </tr>
     `;
+}
+
+function deleteTask(event) {
+    event.preventDefault();
+    const url = $(event.target).closest('form').attr('action');
+    console.debug(`Deleting task at url: ${url}`);
+    
+    const id = $(event.target).parents('form').attr('data-task-id');
+    $.ajax({
+        url: url,
+        type: 'DELETE',
+        headers: {
+            'X-CSRFToken':csrfToken 
+        },
+        data: { id: id },
+        success: function (data) {
+            window.location.reload();
+        }
+    });
 }
