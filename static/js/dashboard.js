@@ -12,15 +12,20 @@ const dateRange = (startDate, endDate) => {
 
     return dates;
 }
-let stats, startDate, endDate;
+let stats, startDate, endDate, page,currentPage, totalPages ;
+
+
 
 async function getData(){
     try {
-        const response = await $.getJSON("/api/tasks");
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentPage = urlParams.get('page') || 1;
+        const response = await $.getJSON(`/api/tasks${urlParams.has('page') ? `?page=${currentPage}` : ''}`);
 
         stats = await response.stats;
         startDate = await response.start_date;
         endDate = await response.end_date;
+        page = await response.page;
         console.log(response);
         return response
 
@@ -36,9 +41,12 @@ getData().then(response => {
     // const startDate = JSON.parse(document.getElementById("start_date").textContent);
     // const endDate = JSON.parse(document.getElementById("end_date").textContent);
 
+    currentPage = page.number;
+
+    totalPages= page.num_pages;
+
     const dateStats = stats.dates;
     const countStats = stats.counts;
-
     print
 
     const dates = dateRange(startDate, endDate);
@@ -309,15 +317,48 @@ getData().then(response => {
         chart.render();
     }
 
+    
+    // Update the urgent tasks count in the UI
     document.getElementById("total-tasks-urgent").innerHTML = countStats.urgent || 0;
+
+    // Update the total tasks count in the UI
     document.getElementById("total-tasks").innerHTML = countStats.total || 0;
 
+    // Get the tasks from the API response
     const tasks = response.page.tasks; // Adjust based on your API response structure
+
+    // Get the table body element and clear its content
     const tableBody = $('#task-table-body');
     tableBody.empty();
+
+    // Append each task to the table
     tasks.forEach((task, index) => {
         tableBody.append(createTaskRow(task, index));
     });
+
+    // Update the current page number in the UI
+    document.getElementById('page-number').textContent = page.number;
+
+    // Update the total number of pages in the UI
+    document.getElementById('total-pages').textContent = page.num_pages;
+
+    // Get the previous and next button elements
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+
+    // Handle the visibility and functionality of the previous button
+    if (!page.has_previous) {
+        prevButton.style.display = 'none';
+    } else {
+        prevButton.href = `?page=${page.number - 1}`;
+    }
+
+    // Handle the visibility and functionality of the next button
+    if (!page.has_next) {
+        nextButton.style.display = 'none';
+    } else {
+        nextButton.href = `?page=${page.number + 1}`;
+    }
 
 
 })
@@ -326,33 +367,12 @@ getData().then(response => {
 
 
 
-
-
-
-
-
-function createPriorityBadge(priority) {
-    let badgeClass = '';
-    let badgeText = '';
-
-    switch (priority) {
-        case 1:
-            badgeClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-            badgeText = 'Low';
-            break;
-        case 2:
-            badgeClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-            badgeText = 'Medium';
-            break;
-        case 3:
-            badgeClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-            badgeText = 'High';
-            break;
-    }
-
-    return `<span class="text-xs font-medium me-2 px-2.5 py-0.5 rounded ${badgeClass}">${badgeText}</span>`;
-}
-
+/**
+ * Creates a table row for a task
+ * @param {Object} task The task information
+ * @param {number} index The index of the task in the list
+ * @return {string} A table row as a string
+ */
 function createTaskRow(task, index) {
     return `
         <tr class="bg-white border-b">
@@ -419,6 +439,37 @@ function createTaskRow(task, index) {
     `;
 }
 
+/**
+ * Creates a priority badge based on the priority number
+ * @param {number} priority The priority of the task
+ * @return {string} A priority badge as a string
+ */
+function createPriorityBadge(priority) {
+    let badgeClass = '';
+    let badgeText = '';
+
+    switch (priority) {
+        case 1:
+            badgeClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+            badgeText = 'Low';
+            break;
+        case 2:
+            badgeClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+            badgeText = 'Medium';
+            break;
+        case 3:
+            badgeClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+            badgeText = 'High';
+            break;
+    }
+
+    return `<span class="text-xs font-medium me-2 px-2.5 py-0.5 rounded ${badgeClass}">${badgeText}</span>`;
+}
+
+/**
+ * Deletes a task
+ * @param {Event} event The event that triggered the deletion
+ */
 function deleteTask(event) {
     event.preventDefault();
     const url = $(event.target).closest('form').attr('action');
@@ -436,4 +487,5 @@ function deleteTask(event) {
             window.location.reload();
         }
     });
+
 }
