@@ -16,11 +16,21 @@ let stats, startDate, endDate, page,currentPage, totalPages ;
 
 
 
+
+
 async function getData(){
     try {
+        
         const urlParams = new URLSearchParams(window.location.search);
         const currentPage = urlParams.get('page') || 1;
-        const response = await $.getJSON(`/api/tasks${urlParams.has('page') ? `?page=${currentPage}` : ''}`);
+        const days = urlParams.get('days') || 30;
+        const tasksPerPage = urlParams.get('tasks_per_page') || 10;
+
+
+        const query = {page_number: currentPage, days, tasks_per_page:tasksPerPage};
+        const response = await $.getJSON(`/api/tasks`, query);
+        console.debug("URL params:", Object.fromEntries(urlParams));
+
 
         stats = await response.stats;
         startDate = await response.start_date;
@@ -36,11 +46,6 @@ async function getData(){
 }
 
 getData().then(response => {
-    console.log("hallo :3")
-    // const stats = JSON.parse(document.getElementById("stats").textContent);
-    // const startDate = JSON.parse(document.getElementById("start_date").textContent);
-    // const endDate = JSON.parse(document.getElementById("end_date").textContent);
-
     currentPage = page.number;
 
     totalPages= page.num_pages;
