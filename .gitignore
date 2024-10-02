@@ -269,7 +269,3 @@ dist
 .pnp.*
 
 **/CACHE
-
-# poetry
-poetry.lock
-poetry.lock

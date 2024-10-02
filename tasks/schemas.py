@@ -11,6 +11,14 @@ class TaskSchema(Schema):
     priority: int
     is_urgent: Optional[bool] = False
 
+
+class CreateTaskSchema(Schema):
+    user_email: str
+    task: str
+    due_by: datetime
+    priority: int
+    is_urgent: Optional[bool] = False
+
 class UpdateTaskSchema(Schema):
     user_email: str
     task: str
