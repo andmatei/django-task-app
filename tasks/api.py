@@ -18,11 +18,11 @@ from tasks.models import Task
 # Utilities
 import datetime
 
-api = NinjaAPI(auth=django_auth)
+api = NinjaAPI(auth=sync_to_async(django_auth)) # Maybe this is fine but feels so wrong...
 
-@api.get("/tasks", response=TaskPageDataSchema, auth=None)
+@api.get("/tasks", response=TaskPageDataSchema)
 async def get_tasks(request, query: TaskQueryParams = Query()):
-    now = timezone.now()  # This is fine as it is
+    now = timezone.now()
     delta = datetime.timedelta(days=query.days)
 
     start_time = now
@@ -93,7 +93,7 @@ async def get_tasks(request, query: TaskQueryParams = Query()):
     return context
 
 
-@api.put("/tasks/{task_id}", response={200: dict, 400: dict}, auth=None)
+@api.put("/tasks/{task_id}", response={200: dict, 400: dict})
 async def update_task(request, task_id: int, payload: UpdateTaskSchema):
     task = await sync_to_async(get_object_or_404)(Task, id=task_id)
 
@@ -107,13 +107,13 @@ async def update_task(request, task_id: int, payload: UpdateTaskSchema):
 
     return JsonResponse(data={"message": "Task updated successfully"}, status=200)
 
-@api.delete("/tasks/{task_id}", response={200: dict, 404: dict}, auth = None)
+@api.delete("/tasks/{task_id}", response={200: dict, 404: dict})
 async def delete_task(request, task_id: int):
     task = await sync_to_async(get_object_or_404)(Task, id=task_id)
     await sync_to_async(task.delete)()
     return JsonResponse(data={"message": "Task deleted successfully"}, status=200)
 
-@api.post("/tasks", response={200: dict, 201: dict, 400: dict}, auth=None)
+@api.post("/tasks", response={200: dict, 201: dict, 400: dict})
 async def create_task(request, payload: CreateTaskSchema):
     try:
         task = await sync_to_async(Task.objects.create)(**payload.dict())
