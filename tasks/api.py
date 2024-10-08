@@ -1,22 +1,27 @@
-# External Libraries
+# Core imports for Ninja API
 from ninja import NinjaAPI
-from asgiref.sync import sync_to_async
-import asyncio
 from ninja import Query
-from .schemas import *
-from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
 from ninja.security import django_auth
 
-# Django
+# Django utilities and HTTP handling
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator
 from django.utils import timezone
 
-# Models
+# Asynchronous utilities
+from asgiref.sync import sync_to_async
+import asyncio
+
+# Importing models
 from tasks.models import Task
 
-# Utilities
+# Importing schemas
+from .schemas import *
+
+# Date and time utilities
 import datetime
+
 
 api = NinjaAPI(auth=sync_to_async(django_auth)) # Maybe this is fine but feels so wrong...
 
@@ -92,6 +97,19 @@ async def get_tasks(request, query: TaskQueryParams = Query()):
     }
     return context
 
+@api.get("/tasks/{task_id}", response=TaskSchema)
+async def get_task(request, task_id: int):
+    task = await sync_to_async(get_object_or_404)(Task, id=task_id)
+    task_data = {
+        'id': task.id,
+        'user_email': task.user_email,
+        'task': task.task,
+        'due_by': task.due_by,
+        'priority': task.priority,
+        'is_urgent': task.is_urgent
+    }
+    return JsonResponse(data=task_data, status=200,safe=False)
+
 
 @api.put("/tasks/{task_id}", response={200: dict, 400: dict})
 async def update_task(request, task_id: int, payload: UpdateTaskSchema):
@@ -107,11 +125,13 @@ async def update_task(request, task_id: int, payload: UpdateTaskSchema):
 
     return JsonResponse(data={"message": "Task updated successfully"}, status=200)
 
+
 @api.delete("/tasks/{task_id}", response={200: dict, 404: dict})
 async def delete_task(request, task_id: int):
     task = await sync_to_async(get_object_or_404)(Task, id=task_id)
     await sync_to_async(task.delete)()
     return JsonResponse(data={"message": "Task deleted successfully"}, status=200)
+
 
 @api.post("/tasks", response={200: dict, 201: dict, 400: dict})
 async def create_task(request, payload: CreateTaskSchema):
