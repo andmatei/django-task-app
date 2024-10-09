@@ -25,6 +25,7 @@ class CreateTaskView(LoginRequiredMixin, View):
                 request, "tasks/edit_task.html", {"form": form, "errors": form.errors}
             )
 
+
 class DeleteTaskView(LoginRequiredMixin, View):
     def post(self, request, task_id):
         task = get_object_or_404(Task, id=task_id)
