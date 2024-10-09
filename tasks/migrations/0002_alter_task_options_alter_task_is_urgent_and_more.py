@@ -4,24 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0001_initial'),
+        ("tasks", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='task',
-            options={'ordering': ['due_by']},
+            name="task",
+            options={"ordering": ["due_by"]},
         ),
         migrations.AlterField(
-            model_name='task',
-            name='is_urgent',
+            model_name="task",
+            name="is_urgent",
             field=models.BooleanField(blank=True, default=False, null=True),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='priority',
-            field=models.IntegerField(choices=[(1, 'Low'), (2, 'Medium'), (3, 'High')], default=2),
+            model_name="task",
+            name="priority",
+            field=models.IntegerField(
+                choices=[(1, "Low"), (2, "Medium"), (3, "High")], default=2
+            ),
         ),
     ]
