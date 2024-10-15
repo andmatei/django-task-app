@@ -12,10 +12,7 @@ const dateRange = (startDate, endDate) => {
 
     return dates;
 }
-let stats, startDate, endDate, page,currentPage, totalPages ;
-
-
-
+let startDate, endDate, tasks, currentPage, totalPages ;
 
 
 async function getData(){
@@ -29,14 +26,12 @@ async function getData(){
 
         const query = {page_number: currentPage, days, tasks_per_page:tasksPerPage};
         const response = await $.getJSON(`/api/tasks`, query);
-        console.debug("URL params:", Object.fromEntries(urlParams));
 
 
-        stats = await response.stats;
-        startDate = await response.start_date;
-        endDate = await response.end_date;
-        page = await response.page;
-        console.log(response);
+        startDate = new Date();
+        endDate = new Date(startDate.getTime() + (days * 24 * 60 * 60 * 1000));
+        tasks = response.tasks;
+        // console.log(response); //debug
         return response
 
     } catch (error) {
@@ -46,15 +41,44 @@ async function getData(){
 }
 
 getData().then(response => {
-    currentPage = page.number;
 
-    totalPages= page.num_pages;
+    // currentPage = page.number;
 
-    const dateStats = stats.dates;
-    const countStats = stats.counts;
-    print
-
+    // totalPages= page.num_pages;
+    
     const dates = dateRange(startDate, endDate);
+
+    const dateStats = {
+        low_priority: Array(dates.length).fill(0),
+        medium_priority: Array(dates.length).fill(0),
+        high_priority: Array(dates.length).fill(0),
+        total: Array(dates.length).fill(0),
+    };
+
+    let countStats = {
+        high_priority: tasks.filter(task => task.priority === 3).length,
+        medium_priority: tasks.filter(task => task.priority === 2).length,
+        low_priority: tasks.filter(task => task.priority === 1).length,
+        total: tasks.length,
+        urgent: tasks.filter(task => task.is_urgent).length
+    };
+    
+
+    tasks.forEach(task => {
+        const taskDate = new Date(task.due_by);
+        const index = dates.findIndex(date => date.toDateString() === taskDate.toDateString());
+        if (index !== -1) {
+            if (task.priority === 1) {
+                dateStats.low_priority[index]++;
+            } else if (task.priority === 2) {
+                dateStats.medium_priority[index]++;
+            } else if (task.priority === 3) {
+                dateStats.high_priority[index]++;
+            }
+            dateStats.total[index]++;
+        }
+    });
+
 
     const PRIORITY = {
         HIGH: {
@@ -221,7 +245,7 @@ getData().then(response => {
                 },
                 {
                     name: "High Priority",
-                    color: "#FDBA8C",
+                    color: "#E11D48",
                     data: dates.map((date, index) => ({ x: date.toDateString(), y: dateStats[PRIORITY.HIGH.field][index] })),
                 },
             ],
@@ -315,7 +339,6 @@ getData().then(response => {
         chart.render();
     }
 
-    console.log(document.getElementById("column-chart"));
 
     if (document.getElementById("column-chart") && typeof ApexCharts !== 'undefined') {
         const chart = new ApexCharts(document.getElementById("column-chart"), getBarChartOptions());
@@ -329,9 +352,6 @@ getData().then(response => {
     // Update the total tasks count in the UI
     document.getElementById("total-tasks").innerHTML = countStats.total || 0;
 
-    // Get the tasks from the API response
-    const tasks = response.page.tasks; // Adjust based on your API response structure
-
     // Get the table body element and clear its content
     const tableBody = $('#task-table-body');
     tableBody.empty();
@@ -342,27 +362,27 @@ getData().then(response => {
     });
 
     // Update the current page number in the UI
-    document.getElementById('page-number').textContent = page.number;
+    document.getElementById('page-number').textContent = response.number;
 
     // Update the total number of pages in the UI
-    document.getElementById('total-pages').textContent = page.num_pages;
+    document.getElementById('total-pages').textContent = response.num_pages;
 
     // Get the previous and next button elements
     const prevButton = document.getElementById('prev-button');
     const nextButton = document.getElementById('next-button');
 
     // Handle the visibility and functionality of the previous button
-    if (!page.has_previous) {
+    if (!response.has_previous) {
         prevButton.style.display = 'none';
     } else {
-        prevButton.href = `?page=${page.number - 1}`;
+        prevButton.href = `?page=${response.number - 1}`;
     }
 
     // Handle the visibility and functionality of the next button
-    if (!page.has_next) {
+    if (!response.has_next) {
         nextButton.style.display = 'none';
     } else {
-        nextButton.href = `?page=${page.number + 1}`;
+        nextButton.href = `?page=${response.number + 1}`;
     }
 
 
@@ -424,7 +444,7 @@ function createTaskRow(task, index) {
                                 </a>
                             </li>
                             <li>
-                                <form action="/api/tasks/${task.id}" onsubmit="deleteTask(event)">
+                                <form action="/api/tasks/${task.id}" onsubmit="deleteTask(${task.id})">
                                     <button type="submit"
                                         class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                         <svg class="w-3 h-3 me-2" aria-hidden="true"
