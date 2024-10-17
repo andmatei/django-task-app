@@ -63,3 +63,43 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+
+function formatDateTime(dateTimeStr) {
+    const date = new Date(dateTimeStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+    return formattedDate;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const taskId = document.querySelector('meta[name="task-id"]').getAttribute('content');
+    if (!taskId) {
+        return;
+    }
+    const csrfToken = getCookie('csrftoken');
+    
+    fetch(`/api/tasks/${taskId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('taskId').value = data.id;
+        document.getElementById('id_user_email').value = data.user_email;
+        document.getElementById('id_task').value = data.task;
+        document.getElementById('id_due_by').value = formatDateTime(data.due_by);
+        document.getElementById('id_priority').value = data.priority;
+        document.getElementById('id_is_urgent').checked = data.is_urgent;
+    })
+    .catch(error => console.error('Error fetching task:', error));
+});

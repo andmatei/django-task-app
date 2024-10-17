@@ -17,9 +17,8 @@ class CreateTaskView(LoginRequiredMixin, View):
 
 class EditTaskView(LoginRequiredMixin, View):
     def get(self, request, task_id):
-        task = get_object_or_404(Task, id=task_id)
-        form = EditTaskForm(instance=task)
-        return render(request, 'tasks/edit_task.html', {'form': form})
+        form = EditTaskForm()
+        return render(request, 'tasks/edit_task.html', {'form': form, 'task_id': task_id})
     
 class Dashboard(LoginRequiredMixin, View):
     def get(self, request):

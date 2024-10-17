@@ -11,6 +11,8 @@
 {% block content %}
 {% load static %}
 
+<meta name="task-id" content="{{ task_id }}">
+
 <form id="taskForm">
     <input type="hidden" id="taskId" name="task_id" value="{% if form.instance.id %}{{ form.instance.id }}{% endif %}">
     <div class="grid gap-6 mb-6">

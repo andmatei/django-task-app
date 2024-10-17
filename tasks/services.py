@@ -3,12 +3,17 @@ from django.core.paginator import Paginator
 from .models import Task
 from django.shortcuts import get_object_or_404
 
-async def serv_get_paginated_tasks(start_time, end_time, page_number, tasks_per_page):
-    all_tasks = await sync_to_async(list)(
-        Task.objects.filter(due_by__range=[start_time, end_time]).values()
-    )
+async def serv_get_paginated_tasks(start_time, end_time, page_number, tasks_per_page, priority_filter):
+    queryset = Task.objects.filter(due_by__range=[start_time, end_time])
+    
+    if priority_filter is not None:
+        queryset = queryset.filter(priority=priority_filter)
+    
+    all_tasks = await sync_to_async(list)(queryset.values())
+    
     paginator = Paginator(all_tasks, tasks_per_page)
     page_obj = await sync_to_async(paginator.get_page)(page_number)
+    
     return page_obj
 
 async def serv_update_task(task_id, payload):

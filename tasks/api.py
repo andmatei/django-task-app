@@ -2,14 +2,16 @@
 from ninja import NinjaAPI
 from ninja import Query
 from ninja.security import django_auth
+from ninja.pagination import paginate
 
 # Django utilities and HTTP handling
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
-from django.utils import timezone#
+from django.utils import timezone
 from django.http import HttpResponse
 from django.forms.models import model_to_dict
+
 
 # Asynchronous utilities
 from asgiref.sync import sync_to_async
@@ -32,27 +34,27 @@ api = NinjaAPI(auth=sync_to_async(django_auth)) # Maybe this is fine but feels s
 @api.get("/tasks", response=TaskPageDataSchema)
 async def get_tasks(request, query: TaskQueryParams = Query()):
     now = timezone.now()
-    delta = datetime.timedelta(days=query.days)
-
+    delta = datetime.timedelta(days=query.days_time_span)
     end_time = now + delta
 
-    page_obj = await serv_get_paginated_tasks(now,end_time, query.page_number, query.tasks_per_page)
+    tasks = await serv_get_paginated_tasks(now,end_time, query.page_number, query.tasks_per_page, query.priority_filter)
 
-    tasks = [
+    processed_tasks = [
         {
             **task,
             'due_by': task['due_by'].date()  # Convert datetime to date
         }
-        for task in page_obj.object_list
+        for task in tasks.object_list
     ]
 
     page_data = {
-        'number': page_obj.number,
-        'num_pages': page_obj.paginator.num_pages,
-        'has_next': page_obj.has_next(),
-        'has_previous': page_obj.has_previous(),
-        'tasks': tasks
+        'tasks': processed_tasks,
+        'number': tasks.number,
+        'num_pages': tasks.paginator.num_pages,
+        'has_next': tasks.has_next(),
+        'has_previous': tasks.has_previous(),
     }
+
     return page_data
 
 

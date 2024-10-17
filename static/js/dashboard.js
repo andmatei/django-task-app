@@ -20,18 +20,18 @@ async function getData(){
         
         const urlParams = new URLSearchParams(window.location.search);
         const currentPage = urlParams.get('page') || 1;
-        const days = urlParams.get('days') || 30;
+        const days_time_span = urlParams.get('days_time_span') || 30;
         const tasksPerPage = urlParams.get('tasks_per_page') || 10;
 
 
-        const query = {page_number: currentPage, days, tasks_per_page:tasksPerPage};
+        const query = {page_number: currentPage, days_time_span, tasks_per_page:tasksPerPage};
         const response = await $.getJSON(`/api/tasks`, query);
 
 
         startDate = new Date();
-        endDate = new Date(startDate.getTime() + (days * 24 * 60 * 60 * 1000));
+        endDate = new Date(startDate.getTime() + (days_time_span * 24 * 60 * 60 * 1000));
         tasks = response.tasks;
-        // console.log(response); //debug
+        console.log(response); //debug
         return response
 
     } catch (error) {
