@@ -6,7 +6,7 @@ from django.db import migrations
 def load_csv_data(apps, schema_editor):
     Task = apps.get_model('tasks', 'Task')
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    csv_file_path = os.path.join(base_dir, 'Django Database.csv')
+    csv_file_path = os.path.join(base_dir, '/tasks/data/Django Database.csv')
     print(f'Loading data from {csv_file_path}')
 
     with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
