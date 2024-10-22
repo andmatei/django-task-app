@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tasks', '0003_alter_task_id'),
+        ("tasks", "0003_alter_task_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='is_urgent',
+            model_name="task",
+            name="is_urgent",
             field=models.BooleanField(default=False),
         ),
     ]
