@@ -9,10 +9,14 @@
     <title>{% block title %}Task App{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- This import is important to stay here, because it is needed for dashboard.js to load properly -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
 
     {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}">
     {% endcompress %}
+
 </head>
 
 <body class="bg-white">
@@ -139,11 +143,10 @@
     {% block scripts %}
     {% endblock %}
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
 </body>
 

@@ -134,5 +134,7 @@ COMPRESS_ENABLED = True
 
 STATICFILES_FINDERS = ("compressor.finders.CompressorFinder",)
 
+ASGI_APPLICATION = 'task_app.asgi.application'
+
 # Login URL
 LOGIN_URL = "/users/login/"

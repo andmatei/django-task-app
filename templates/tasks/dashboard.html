@@ -7,7 +7,7 @@
 {% block page-title %}Dashboard{% endblock %}
 
 {% block content %}
-
+<meta name="csrf-token" content="{{ csrf_token }}">
 <div class="grid grid-cols-3 gap-4 mb-4">
     <div class="flex flex-col justify-between col-span-1 row-span-1 bg-white rounded-lg shadow-sm p-4">
         <div class="mb-8">
@@ -26,12 +26,8 @@
                 </span>
 
                 <div class="align-bottom mb-2">
-                    <p class="text-gray-800 font-bold text-xl">
-                        {% if stats.counts.urgent %}
-                        {{stats.counts.urgent}}
-                        {% else %}
-                        0
-                        {% endif %}
+                    <p id="total-tasks-urgent" class="text-gray-800 font-bold text-xl">
+                        <!-- shows urgent over all tasks -->
                     </p>
                     <p class="text-gray-800 text-base">Urgent tasks</p>
                 </div>
@@ -48,12 +44,8 @@
                 </span>
 
                 <div class="align-bottom mb-2">
-                    <p class="text-gray-800 font-bold text-xl">
-                        {% if stats.counts.total %}
-                        {{stats.counts.total}}
-                        {% else %}
-                        0
-                        {% endif %}
+                    <p id="total-tasks" class="text-gray-800 font-bold text-xl">
+                        <!-- shows all total tasks -->
                     </p>
                     <p class="text-gray-800 text-base">Total tasks</span></p>
                 </div>
@@ -98,122 +90,38 @@
                 <th scope="col" class="px-6 py-3">Actions</th>
             </tr>
         </thead>
-        <tbody>
-            {% for task in page %}
-            <tr class="bg-white border-b">
-                <th scope="row" class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap">
-                    {{ task.task }}
-                </th>
-                <td class="px-6 py-3">
-                    {{ task.user_email }}
-                </td>
-                <td class="px-6 py-3">
-                    {{ task.due_by }}
-                </td>
-                <td class="px-6 py-3">
-                    {% if task.priority == 1 %}
-                    <span
-                        class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
-                        Low
-                    </span>
-                    {% elif task.priority == 2 %}
-                    <span
-                        class="bg-yellow-100 text-yellow-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">
-                        Medium
-                    </span>
-                    {% else %}
-                    <span
-                        class="bg-red-100 text-red-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">
-                        High
-                    </span>
-                    {% endif %}
-                <td class="px-6 py-3">
-                    <input type="checkbox" {% if task.is_urgent %} checked {% endif %} disabled
-                        class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-                </td>
-                <td class="px-6 py-3">
-                    <div class="flex items-center">
-                        <button id="widgetDropdownButton-{{forloop.counter}}"
-                            data-dropdown-toggle="widgetDropdown-{{forloop.counter}}" data-dropdown-placement="bottom"
-                            type="button"
-                            class="inline-flex items-center justify-center text-gray-500 w-8 h-8 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm"><svg
-                                class="w-3.5 h-3.5 text-gray-800 dark:text-white" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
-                                <path
-                                    d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
-                            </svg><span class="sr-only">Open dropdown</span>
-                        </button>
-                        <div id="widgetDropdown-{{forloop.counter}}"
-                            class="z-20 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200"
-                                aria-labelledby="widgetDropdownButton-{{forloop.counter}}">
-                                <li>
-                                    <form action="{% url 'task-update' task.id %}" method="get">
-                                        {% csrf_token %}
-                                        <button type="submit"
-                                            class="flex w-full items-center px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"><svg
-                                                class="w-3 h-3 me-2" aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 21 21">
-                                                <path stroke="currentColor" stroke-linecap="round"
-                                                    stroke-linejoin="round" stroke-width="2"
-                                                    d="M7.418 17.861 1 20l2.139-6.418m4.279 4.279 10.7-10.7a3.027 3.027 0 0 0-2.14-5.165c-.802 0-1.571.319-2.139.886l-10.7 10.7m4.279 4.279-4.279-4.279m2.139 2.14 7.844-7.844m-1.426-2.853 4.279 4.279" />
-                                            </svg>Edit
-                                        </button>
-                                    </form>
-                                </li>
-                                <li>
-                                    <form action="{% url 'task-delete' task.id%}" method="post">
-                                        {% csrf_token %}
-                                        <button type="submit"
-                                            class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"><svg
-                                                class="w-3 h-3 me-2" aria-hidden="true"
-                                                xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                                viewBox="0 0 20 20">
-                                                <path
-                                                    d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z" />
-                                                <path
-                                                    d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" />
-                                            </svg>Detele
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
+        <tbody id="task-table-body">
+            <!-- Rows will be inserted here by JQuery -->
         </tbody>
     </table>
     <div class="flex flex-col items-center mt-4">
         <!-- Help text -->
         <span class="text-sm text-gray-700 dark:text-gray-400">
-            Page <span class="font-semibold text-gray-900 dark:text-white">{{ page.number }}</span> of <span
-                class="font-semibold text-gray-900 dark:text-white">{{ page.paginator.num_pages }} </span>.
+            Page <span id="page-number" class="font-semibold text-gray-900 dark:text-white"></span> of <span
+                id="total-pages" class="font-semibold text-gray-900 dark:text-white"></span>.
+        </span>
         <!-- Buttons -->
         <div class="inline-flex mt-2 xs:mt-0">
-            {% if page.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}"
-                class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white bg-gray-800 rounded hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+            <a href="#" id="prev-button" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white bg-gray-800 rounded hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                 Prev
             </a>
-            {% endif %}
-            <span class="w-1>"></span>
-            {% if page.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}"
-                class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white bg-gray-800 border-0 border-s border-gray-700 rounded hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+            <span class="w-1"></span>
+            <a href="#" id="next-button" class="flex items-center justify-center px-3 h-8 text-sm font-medium text-white bg-gray-800 border-0 border-s border-gray-700 rounded hover:bg-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                 Next
             </a>
-            {% endif %}
         </div>
     </div>
+    
+    
+
 </div>
+<script src="{% static 'js/dashboard.js' %}"></script>
+
 
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'js/dashboard.js' %}" defer></script>
-{{ stats|json_script:"stats" }}
-{{ start_date|json_script:"start_date" }}
-{{ end_date|json_script:"end_date" }}
+
+{{ page|json_script:"page" }}
+
 {% endblock %}
